@@ -1,11 +1,11 @@
 <?php
 
-namespace subzeta\SelaeScraper\LaQuiniela;
+namespace subzeta\SelaeScraper\Page\LaQuiniela;
 
-use subzeta\SelaeScraper\LaQuiniela\Fixture\FixtureCollection;
-use subzeta\SelaeScraper\Response as ResponseInterface;
+use subzeta\SelaeScraper\Page\LaQuiniela\Fixture\FixtureCollection;
+use subzeta\SelaeScraper\Page\SuccessfulResponse;
 
-class Response implements ResponseInterface
+class Response extends SuccessfulResponse
 {
     private $collection;
 
@@ -16,7 +16,7 @@ class Response implements ResponseInterface
 
     public function isSuccessful() : bool
     {
-        return !$this->collection->isEmpty();
+        return parent::isSuccessful() && !$this->collection->isEmpty();
     }
 
     public function fixtureCollection() : FixtureCollection

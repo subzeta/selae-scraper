@@ -1,12 +1,14 @@
 <?php
 
-namespace Tests\LaQuiniela;
+namespace Tests\Page\LaQuiniela;
 
 use Goutte\Client;
 use PHPUnit\Framework\TestCase;
-use subzeta\SelaeScraper\LaQuiniela\Response;
-use subzeta\SelaeScraper\LaQuiniela\Fixture\FixtureCollection;
-use subzeta\SelaeScraper\LaQuiniela\Scraper;
+use subzeta\SelaeScraper\Exception\UnexpectedDomException;
+use subzeta\SelaeScraper\Page\ErrorResponse;
+use subzeta\SelaeScraper\Page\LaQuiniela\Response;
+use subzeta\SelaeScraper\Page\LaQuiniela\Fixture\FixtureCollection;
+use subzeta\SelaeScraper\Page\LaQuiniela\Scraper;
 use Symfony\Component\DomCrawler\Crawler;
 
 class ScraperTest extends TestCase
@@ -125,5 +127,39 @@ class ScraperTest extends TestCase
 
         $this->assertFalse($collection->isEmpty());
         $this->assertEquals(FixtureCollection::fromArray(self::A_RESPONSE), $collection);
+    }
+
+    /** @test */
+    public function itShouldThrowAnExpectedExceptionWhenContainerIsntFound()
+    {
+        $crawler = new Crawler();
+        $crawler->addContent(file_get_contents(__DIR__.'/Mock/page_container_not_found.html'), 'html');
+
+        $this->client
+            ->shouldReceive('request')
+            ->andReturn($crawler);
+
+        $response = $this->scraper->scrape();
+
+        $this->assertInstanceOf(ErrorResponse::class, $response);
+        $this->assertFalse($response->isSuccessful());
+        $this->assertSame((new UnexpectedDomException())->getMessage(), $response->errorMessage());
+    }
+
+    /** @test */
+    public function itShouldThrowAnExpectedExceptionWhenContainerExistsButDataCannotBeParsed()
+    {
+        $crawler = new Crawler();
+        $crawler->addContent(file_get_contents(__DIR__.'/Mock/page_unexpected_data.html'), 'html');
+
+        $this->client
+            ->shouldReceive('request')
+            ->andReturn($crawler);
+
+        $response = $this->scraper->scrape();
+
+        $this->assertInstanceOf(ErrorResponse::class, $response);
+        $this->assertFalse($response->isSuccessful());
+        $this->assertSame((new UnexpectedDomException())->getMessage(), $response->errorMessage());
     }
 }

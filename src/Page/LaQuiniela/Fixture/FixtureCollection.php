@@ -1,6 +1,6 @@
 <?php
 
-namespace subzeta\SelaeScraper\LaQuiniela\Fixture;
+namespace subzeta\SelaeScraper\Page\LaQuiniela\Fixture;
 
 class FixtureCollection
 {
